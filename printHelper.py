@@ -1,4 +1,4 @@
-def printHelp():
+def help():
     print("First argument:")
     print("    encrypt -for encryption mode")
     print("    decrypt -for decryption mode")
@@ -7,7 +7,11 @@ def printHelp():
     print("3rd argument:")
     print("    -alg -specify the algorithm you want to use")
 
-def printHelpExtra(option):
+def missingArgs():
+    print("No arguments found.")
+    print("To see the list of available arguments use -h")
+
+def helpExtra(option):
     if option == "-alg":
         printAlg()
     else:

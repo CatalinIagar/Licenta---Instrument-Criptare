@@ -11,15 +11,43 @@ def printFileDetails(file):
     print("File extension: " + extension)
     print("File size: " + str(size) + " bytes")
 
+def encryptAES(file):
+    if len(sys.argv) < 8 or sys.argv[6] != "-m":
+        print("Use -m to specify AES mode")
+        return
+
+    mode = sys.argv[7]
+
+    if len(sys.argv) < 10 or sys.argv[8] != "-k":
+        print("Use -k to specify encryption key")
+        return
+
+    key = sys.argv[9]
+    if len(key) != 16:
+        print("Invalid key")
+        print("Key must be 128-bit long (16 characters)")
+        return
+
+    if mode == "ECB":
+        print("ECB")
+    elif mode == "CBC":
+        print("CBC")
+    elif mode == "CFB":
+        print("CFB")
+    elif mode == "OFB":
+        print("OFB")
+    else:
+        print("Invalid mode")
+        print("Use -h -alg to see the list of available AES modes")
 
 def encryptionStart():
     print("Encryption process")
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 4 or sys.argv[2] != "-f":
         print("Use -f to specify the file for encryption")
         return
 
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 6 or sys.argv[4] != "-alg":
         print("Use -alg to specify the encryption algorithm")
         print("Use -h -alg to see the list of available algorithms")
         return
@@ -28,7 +56,7 @@ def encryptionStart():
     algorithm = sys.argv[5]
 
     if algorithm == "AES":
-        print("AES")
+        encryptAES(filename)
     elif algorithm == "TwoFish":
         print("TwoFish")
     elif algorithm == "Salsa":
@@ -52,10 +80,10 @@ if __name__ == '__main__':
         elif sys.argv[1] == "-h":
             if len(sys.argv) == 3:
                 extraArg = sys.argv[2]
-                printHelper.printHelpExtra(extraArg)
+                printHelper.helpExtra(extraArg)
             else:
-                printHelper.printHelp()
+                printHelper.help()
         else:
-            printHelper.printHelp()
+            printHelper.missingArgs()
     else:
-        printHelper.printHelp()
+        printHelper.missingArgs()
