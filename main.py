@@ -124,7 +124,23 @@ def encryptAES(file):
     elif mode == "CFB":
         print("CFB")
     elif mode == "OFB":
-        print("OFB")
+        iv = findParam("-iv")
+        if not iv:
+            iv = os.urandom(16)
+            iv_string = binascii.hexlify(iv)
+        else:
+            iv_string = binascii.hexlify(iv)
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: OFB")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "OFB", key, iv)
+            encryption.encrypt()
+        else:
+            print("Program stopped")
     else:
         print("Invalid mode")
         print("Use -h -alg to see the list of available AES modes")
@@ -165,7 +181,7 @@ def decryptAES(file):
         iv = [hex(byte) for byte in iv]
         printFileDetails(file)
         print("Algorithm: AES")
-        print("Mode: EBC")
+        print("Mode: CBC")
         print("Key: {}".format(key))
         print("IV: {}".format(iv_string))
         res = input("Continue? (y/n): ")
@@ -178,7 +194,22 @@ def decryptAES(file):
     elif mode == "CFB":
         print("CFB")
     elif mode == "OFB":
-        print("OFB")
+        iv = findParam("-iv")
+        if not iv:
+            return
+        iv_string = binascii.hexlify(iv)
+        iv = [hex(byte) for byte in iv]
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: OFB")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "OFB", key, iv)
+            encryption.decrypt()
+        else:
+            print("Program stopped")
     else:
         print("Invalid mode")
         print("Use -h -alg to see the list of available AES modes")
