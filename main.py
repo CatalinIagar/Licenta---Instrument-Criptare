@@ -1,5 +1,6 @@
 import sys
 import os
+import binascii
 
 import printHelper
 from Algorithms import AES
@@ -24,6 +25,20 @@ def findParam(param):
         return False
 
     value = sys.argv[pos + 1]
+
+    if param == "-iv":
+        try:
+            value = binascii.unhexlify(value)
+        except binascii.Error as e:
+            print(f'Error: {e}')
+            return
+
+        if len(value) != 16:
+            print("Incorrect IV size")
+            return False
+        else:
+            print("Value correct")
+            return value
 
     if param == "-f":
         if os.path.isfile(value):
@@ -59,6 +74,7 @@ def printFileDetails(file):
     print("File extension: " + extension)
     print("File size: " + str(size) + " bytes")
 
+
 def encryptAES(file):
     mode = findParam("-m")
     if not mode:
@@ -88,7 +104,77 @@ def encryptAES(file):
         else:
             print("Program stopped")
     elif mode == "CBC":
-        print("CBC")
+        iv = findParam("-iv")
+        if not iv:
+            iv = os.urandom(16)
+            iv_string = binascii.hexlify(iv)
+        else:
+            iv_string = binascii.hexlify(iv)
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: CBC")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "CBC", key, iv)
+            encryption.encrypt()
+        else:
+            print("Program stopped")
+    elif mode == "CFB":
+        print("CFB")
+    elif mode == "OFB":
+        print("OFB")
+    else:
+        print("Invalid mode")
+        print("Use -h -alg to see the list of available AES modes")
+
+def decryptAES(file):
+    mode = findParam("-m")
+    if not mode:
+        print("Use -m to specify the mode for AES")
+        return
+
+    key = findParam("-k")
+
+    if not key:
+        print("Use -k to specify the mode for AES")
+        return
+
+    if len(key) != 16:
+        print("Invalid key")
+        print("Key must be 128-bit long (16 characters)")
+        return
+
+    if mode == "ECB":
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: EBC")
+        print("Key: {}".format(key))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "ECB", key)
+            encryption.decrypt()
+        else:
+            print("Program stopped")
+    elif mode == "CBC":
+        iv = findParam("-iv")
+        if not iv:
+            return
+        iv_string = binascii.hexlify(iv)
+        iv = [hex(byte) for byte in iv]
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: EBC")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "CBC", key, iv)
+            encryption.decrypt()
+        else:
+            print("Program stopped")
+
     elif mode == "CFB":
         print("CFB")
     elif mode == "OFB":
@@ -126,6 +212,34 @@ def encryptionStart():
 
 def decryptionStart():
     print("Decryption process")
+
+    filename = findParam("-f")
+    if not filename:
+        print("Use -f to specify the file for encryption")
+        return
+
+    algorithm = findParam("-alg")
+    if not algorithm:
+        print("Use -alg to specify the encryption algorithm")
+        print("Use -h -alg to see the list of available algorithms")
+        return
+
+    if algorithm == "AES":
+        extension = os.path.splitext(filename)[1]
+        if extension != ".aes":
+            print("Wrong file extension for AES decryption")
+        else:
+            decryptAES(filename)
+    elif algorithm == "TwoFish":
+        print("TwoFish")
+    elif algorithm == "Salsa":
+        print("Salsa 20/12")
+    elif algorithm == "RC4":
+        print("RC4")
+    else:
+        print("Invalid algorithm")
+        print("Use -h -alg to see the list of available algorithms")
+        return
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

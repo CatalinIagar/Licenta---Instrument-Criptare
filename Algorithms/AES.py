@@ -1,3 +1,6 @@
+import os
+import binascii
+
 def turn_to_hex(text):
     res = []
     for letter in text:
@@ -6,7 +9,7 @@ def turn_to_hex(text):
 
 
 class AES:
-    sbox = [
+    SBOX = [
         [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76],
         [0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0],
         [0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15],
@@ -25,7 +28,7 @@ class AES:
         [0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16]
     ]
 
-    sboxInv = [
+    SBOXINV = [
         [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb],
         [0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb],
         [0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e],
@@ -44,28 +47,29 @@ class AES:
         [0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d]
     ]
 
-    mixCol = [
+    MIXCOL = [
         [0x02, 0x03, 0x01, 0x01],
         [0x01, 0x02, 0x03, 0x01],
         [0x01, 0x01, 0x02, 0x03],
         [0x03, 0x01, 0x01, 0x02]
     ]
 
-    mixColInv = [
+    MIXCOLINV = [
         [0x0e, 0x0b, 0x0d, 0x09],
         [0x09, 0x0e, 0x0b, 0x0d],
         [0x0d, 0x09, 0x0e, 0x0b],
         [0x0b, 0x0d, 0x09, 0x0e]
     ]
 
-    round_constants = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36]
+    ROUND_CONSTANTS = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36]
 
-    def __init__(self, file, mode, key):
+    def __init__(self, file, mode, key, iv=None):
         self.file = file
         self.key = key
         self.mode = mode
         self.keys = []
         self.state = []
+        self.iv = iv
 
     def generate_words(self, key):
         temp = key
@@ -88,13 +92,13 @@ class AES:
                 row = int(value[2], 16)
                 column = int(value[3], 16)
 
-            subResult.append(hex(self.sbox[row][column]))
+            subResult.append(hex(self.SBOX[row][column]))
 
         temp = []
         for item in subResult:
             temp.append(item)
 
-        subResult[0] = hex(int(subResult[0], 16) ^ self.round_constants[round])
+        subResult[0] = hex(int(subResult[0], 16) ^ self.ROUND_CONSTANTS[round])
 
         return subResult
 
@@ -125,7 +129,7 @@ class AES:
             result = [item for sublist in roundKey for item in sublist]
             self.keys.append(result)
 
-    def addRoundKey(self, key):
+    def add_round_key(self, key):
         result = []
 
         for i in range(4):
@@ -136,7 +140,7 @@ class AES:
 
         self.state = result
 
-    def subBytes(self):
+    def sub_bytes(self):
         result = []
         for i in range(4):
             rows = []
@@ -147,18 +151,46 @@ class AES:
                 else:
                     row = int(self.state[i][j][2], 16)
                     column = int(self.state[i][j][3], 16)
-                rows.append(hex(self.sbox[row][column]))
+                rows.append(hex(self.SBOX[row][column]))
             result.append(rows)
 
         self.state = result
 
-    def shiftRows(self):
+    def inverse_sub_bytes(self):
+        result = []
+        for i in range(4):
+            rows = []
+            for j in range(4):
+                if len(self.state[i][j]) == 3:
+                    row = 0
+                    column = int(self.state[i][j][2], 16)
+                else:
+                    row = int(self.state[i][j][2], 16)
+                    column = int(self.state[i][j][3], 16)
+                rows.append(hex(self.SBOXINV[row][column]))
+            result.append(rows)
 
-        self.state[1][0], self.state[1][1], self.state[1][2], self.state[1][3] = self.state[1][1], self.state[1][2], self.state[1][3], self.state[1][0]
-        self.state[2][0], self.state[2][1], self.state[2][2], self.state[2][3] = self.state[2][2], self.state[2][3], self.state[2][0], self.state[2][1]
-        self.state[3][0], self.state[3][1], self.state[3][2], self.state[3][3] = self.state[3][3], self.state[3][0], self.state[3][1], self.state[3][2]
+        self.state = result
 
-    def mixColumn(self):
+    def shift_rows(self):
+
+        self.state[1][0], self.state[1][1], self.state[1][2], self.state[1][3] = self.state[1][1], self.state[1][2], \
+                                                                                 self.state[1][3], self.state[1][0]
+        self.state[2][0], self.state[2][1], self.state[2][2], self.state[2][3] = self.state[2][2], self.state[2][3], \
+                                                                                 self.state[2][0], self.state[2][1]
+        self.state[3][0], self.state[3][1], self.state[3][2], self.state[3][3] = self.state[3][3], self.state[3][0], \
+                                                                                 self.state[3][1], self.state[3][2]
+
+    def inverse_shift_rows(self):
+
+        self.state[1][0], self.state[1][1], self.state[1][2], self.state[1][3] = self.state[1][3], self.state[1][0], \
+                                                                                 self.state[1][1], self.state[1][2]
+        self.state[2][0], self.state[2][1], self.state[2][2], self.state[2][3] = self.state[2][2], self.state[2][3], \
+                                                                                 self.state[2][0], self.state[2][1]
+        self.state[3][0], self.state[3][1], self.state[3][2], self.state[3][3] = self.state[3][1], self.state[3][2], \
+                                                                                 self.state[3][3], self.state[3][0]
+
+    def mix_column(self):
         result = []
         res = []
 
@@ -172,7 +204,11 @@ class AES:
             row = result[i]
             row_res = []
             for j in range(4):
-                val = self.calcMixColumn(int(row[0], 16), self.mixCol[j][0]) ^ self.calcMixColumn(int(row[1], 16), self.mixCol[j][1]) ^ self.calcMixColumn(int(row[2], 16), self.mixCol[j][2]) ^ self.calcMixColumn(int(row[3], 16), self.mixCol[j][3])
+                val = self.calc_mix_column(int(row[0], 16), self.MIXCOL[j][0]) ^ self.calc_mix_column(int(row[1], 16),
+                                                                                                      self.MIXCOL[j][
+                                                                                                          1]) ^ self.calc_mix_column(
+                    int(row[2], 16),
+                    self.MIXCOL[j][2]) ^ self.calc_mix_column(int(row[3], 16), self.MIXCOL[j][3])
                 row_res.append(hex(val))
             res.append(row_res)
 
@@ -185,7 +221,38 @@ class AES:
 
         self.state = final
 
-    def calcMixColumn(self, a, b):
+    def inverse_mix_column(self):
+        result = []
+        res = []
+
+        for i in range(4):
+            row = []
+            for j in range(4):
+                row.append(self.state[j][i])
+            result.append(row)
+
+        for i in range(4):
+            row = result[i]
+            row_res = []
+            for j in range(4):
+                val = self.calc_inv_mix_column(int(row[0], 16), self.MIXCOLINV[j][0]) ^ self.calc_inv_mix_column(
+                    int(row[1], 16),
+                    self.MIXCOLINV[j][1]) ^ self.calc_inv_mix_column(int(row[2], 16),
+                                                                     self.MIXCOLINV[j][2]) ^ self.calc_inv_mix_column(
+                    int(row[3], 16), self.MIXCOLINV[j][3])
+                row_res.append(hex(val))
+            res.append(row_res)
+
+        final = [
+            [res[0][0], res[1][0], res[2][0], res[3][0]],
+            [res[0][1], res[1][1], res[2][1], res[3][1]],
+            [res[0][2], res[1][2], res[2][2], res[3][2]],
+            [res[0][3], res[1][3], res[2][3], res[3][3]]
+        ]
+
+        self.state = final
+
+    def calc_mix_column(self, a, b):
         if b == 1:
             return a
         if b == 2:
@@ -194,44 +261,223 @@ class AES:
             else:
                 return a * 2
         if b == 3:
-            return self.calcMixColumn(a, 2) ^ a
+            return self.calc_mix_column(a, 2) ^ a
+
+    def calc_inv_mix_column(self, a, b):
+        if b == 2:
+            if a * 2 > 255:
+                return (a * 2) ^ 0x11b
+            else:
+                return a * 2
+        if b == 9:
+            return self.calc_inv_mix_column(self.calc_inv_mix_column(self.calc_inv_mix_column(a, 2), 2), 2) ^ a
+        if b == 11:
+            return self.calc_inv_mix_column(self.calc_inv_mix_column(self.calc_inv_mix_column(a, 2), 2) ^ a, 2) ^ a
+        if b == 13:
+            return self.calc_inv_mix_column(self.calc_inv_mix_column(self.calc_inv_mix_column(a, 2) ^ a, 2), 2) ^ a
+        if b == 14:
+            return self.calc_inv_mix_column(self.calc_inv_mix_column(self.calc_inv_mix_column(a, 2) ^ a, 2) ^ a, 2)
+
+    def encrypt_process(self, hex_data):
+        self.state = []
+
+        for i in range(4):
+            self.state.append(hex_data[i::4])
+
+        for i in range(11):
+            key = []
+            for j in range(4):
+                key.append(self.keys[i][j::4])
+            if i == 0:
+                self.add_round_key(key)
+            else:
+                self.sub_bytes()
+                self.shift_rows()
+                if i != 10:
+                    self.mix_column()
+                self.add_round_key(key)
+
+    def decrypt_process(self, hex_data):
+        self.state = []
+
+        for i in range(4):
+            self.state.append(hex_data[i::4])
+
+        for i in range(10, -1, -1):
+            key = []
+            for j in range(4):
+                key.append(self.keys[i][j::4])
+            if i == 10:
+                self.add_round_key(key)
+            else:
+                self.inverse_shift_rows()
+                self.inverse_sub_bytes()
+                self.add_round_key(key)
+                if i != 0:
+                    self.inverse_mix_column()
 
     def encrypt(self):
         if self.mode == "ECB":
             self.encrypt_ecb()
+        if self.mode == "CBC":
+            self.encrypt_cbc()
+
+    def decrypt(self):
+        if self.mode == "ECB":
+            self.decrypt_ecb()
+        if self.mode == "CBC":
+            self.decrypt_cbc()
 
     def encrypt_ecb(self):
         self.generate_keys(self.key)
+        file_to_write = self.file + ".aes"
 
-        with open(self.file, "rb") as f:
+        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
             while True:
                 data = f.read(16)
                 if not data:
                     break
 
                 if len(data) != 16:
-                    difference = 16 - len(data)
-                    padding = hex(difference)
-                    while len(data) != 16:
-                        data += padding.encode('utf-8')
+                    padding_needed = 16 - len(data)
+                    padding = bytes([padding_needed]) * padding_needed
+                    data = data + padding
                 hex_data = [hex(byte) for byte in data]
 
-                self.state = []
+                self.encrypt_process(hex_data)
 
-                for i in range(4):
-                    self.state.append(hex_data[i::4])
+                hex_string = ""
+                for col in range(4):
+                    for row in range(4):
+                        if len(self.state[row][col][2:]) == 1:
+                            hex_string += "0" + self.state[row][col][2:]
+                        else:
+                            hex_string += self.state[row][col][2:]
+                w.write(bytes.fromhex(hex_string))
 
-                for i in range(11):
-                    key = []
-                    for j in range(4):
-                        key.append(self.keys[i][j::4])
-                    if i == 0:
-                        self.addRoundKey(key)
-                    else:
-                        self.subBytes()
-                        self.shiftRows()
-                        if i != 10:
-                            self.mixColumn()
-                        self.addRoundKey(key)
+    def encrypt_cbc(self):
+        self.generate_keys(self.key)
+        file_to_write = self.file + ".aes"
+        first = True
+        iv = [hex(byte) for byte in self.iv]
 
-                print(self.state)
+        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
+            while True:
+                data = f.read(16)
+                if not data:
+                    break
+
+                if len(data) != 16:
+                    padding_needed = 16 - len(data)
+                    padding = bytes([padding_needed]) * padding_needed
+                    data = data + padding
+                hex_data = [hex(byte) for byte in data]
+
+                if first:
+                    for i in range(16):
+                        hex_data[i] = hex(int(hex_data[i], 16) ^ int(iv[i], 16))
+                    first = False
+                else:
+                    for i in range(16):
+                        hex_data[i] = hex(int(hex_data[i], 16) ^ int(prev_block[i], 16))
+                self.encrypt_process(hex_data)
+
+                hex_string = ""
+                for col in range(4):
+                    for row in range(4):
+                        if len(self.state[row][col][2:]) == 1:
+                            hex_string += "0" + self.state[row][col][2:]
+                        else:
+                            hex_string += self.state[row][col][2:]
+
+                prev_block = bytes.fromhex(hex_string)
+                prev_block = [hex(byte) for byte in prev_block]
+
+                w.write(bytes.fromhex(hex_string))
+
+    def decrypt_ecb(self):
+        self.generate_keys(self.key)
+        file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
+        blocks = os.path.getsize(self.file) / 16
+
+        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
+            i = 0
+            while True:
+                i += 1
+                data = f.read(16)
+                if not data:
+                    break
+
+                hex_data = [hex(byte) for byte in data]
+
+                self.decrypt_process(hex_data)
+
+                hex_string = ""
+                for col in range(4):
+                    for row in range(4):
+                        if len(self.state[row][col][2:]) == 1:
+                            hex_string += "0" + self.state[row][col][2:]
+                        else:
+                            hex_string += self.state[row][col][2:]
+
+                block = bytes.fromhex(hex_string)
+
+                if i == blocks:
+                    padding_length = block[-1]
+                    padding = block[-padding_length:-1]
+
+                    if all(byte == padding_length for byte in padding):
+                        block = block[:-padding_length]
+
+                w.write(block)
+
+    def decrypt_cbc(self):
+        self.generate_keys(self.key)
+        file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
+        blocks = os.path.getsize(self.file) / 16
+        first = True
+
+        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
+            i = 0
+            while True:
+                i += 1
+                data = f.read(16)
+                if not data:
+                    break
+
+                hex_data = [hex(byte) for byte in data]
+
+                self.decrypt_process(hex_data)
+
+                if first:
+                    for col in range(4):
+                        for row in range(4):
+                            self.state[row][col] = hex(int(self.state[row][col], 16) ^ int(self.iv[col * 4 + row], 16))
+                    first = False
+                else:
+                    for col in range(4):
+                        for row in range(4):
+                            self.state[row][col] = hex(int(self.state[row][col], 16) ^ int(prev_block[col * 4 + row], 16))
+
+                hex_string = ""
+                for col in range(4):
+                    for row in range(4):
+                        if len(self.state[row][col][2:]) == 1:
+                            hex_string += "0" + self.state[row][col][2:]
+                        else:
+                            hex_string += self.state[row][col][2:]
+
+                print(hex_string)
+
+                block = bytes.fromhex(hex_string)
+
+                if i == blocks:
+                    padding_length = block[-1]
+                    padding = block[-padding_length:-1]
+
+                    if all(byte == padding_length for byte in padding):
+                        block = block[:-padding_length]
+
+                prev_block = hex_data
+
+                w.write(block)
