@@ -442,6 +442,46 @@ class AES:
 
                 w.write(bytes.fromhex(hex_string))
 
+    def decrypt_cfb(self):
+        self.generate_keys(self.key)
+        file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
+        first = True
+        iv = [hex(byte) for byte in self.iv]
+
+        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
+            while True:
+                data = f.read(16)
+                if not data:
+                    break
+
+                hex_data = [hex(byte) for byte in data]
+
+                if first:
+                    self.encrypt_process(iv)
+                    first = False
+                else:
+                    self.encrypt_process(prev_hex_data)
+
+                crypt_block = []
+
+                for col in range(4):
+                    for row in range(4):
+                        crypt_block.append(self.state[row][col])
+
+                for i in range(len(hex_data)):
+                    crypt_block[i] = hex(int(crypt_block[i], 16) ^ int(hex_data[i], 16))
+
+                hex_string = ""
+                for i in range(len(hex_data)):
+                    if len(crypt_block[i][2:]) == 1:
+                        hex_string += "0" + crypt_block[i][2:]
+                    else:
+                        hex_string += crypt_block[i][2:]
+
+                prev_hex_data = hex_data
+
+                w.write(bytes.fromhex(hex_string))
+
     def encrypt_ofb(self):
         self.generate_keys(self.key)
         file_to_write = self.file + ".aes"
@@ -516,42 +556,7 @@ class AES:
 
                 w.write(block)
 
-    def decrypt_cfb(self):
-        self.generate_keys(self.key)
-        file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
-        first = True
 
-        with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
-            while True:
-                data = f.read(16)
-                if not data:
-                    break
-
-                hex_data = [hex(byte) for byte in data]
-
-                if first:
-                    self.decrypt_process(self.iv)
-                    first = False
-                else:
-                    self.decrypt_process(hex_data)
-
-                crypt_block = []
-
-                for col in range(4):
-                    for row in range(4):
-                        crypt_block.append(self.state[row][col])
-
-                for i in range(len(hex_data)):
-                    crypt_block[i] = hex(int(crypt_block[i], 16) ^ int(hex_data[i], 16))
-
-                hex_string = ""
-                for i in range(len(hex_data)):
-                    if len(crypt_block[i][2:]) == 1:
-                        hex_string += "0" + crypt_block[i][2:]
-                    else:
-                        hex_string += crypt_block[i][2:]
-
-                w.write(bytes.fromhex(hex_string))
 
     def decrypt_cbc(self):
         self.generate_keys(self.key)

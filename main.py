@@ -210,9 +210,10 @@ def decryptAES(file):
     elif mode == "CFB":
         iv = findParam("-iv")
         if not iv:
-            return
-        iv_string = binascii.hexlify(iv)
-        iv = [hex(byte) for byte in iv]
+            iv = os.urandom(16)
+            iv_string = binascii.hexlify(iv)
+        else:
+            iv_string = binascii.hexlify(iv)
         printFileDetails(file)
         print("Algorithm: AES")
         print("Mode: CFB")
