@@ -3,7 +3,7 @@ import os
 import binascii
 
 import printHelper
-from Algorithms import AES
+from Algorithms import AES, RC4
 
 ALGORITHMS = ["AES", "TwoFish", "Salsa", "RC4", "RSA", "ECC"]
 AES_MODES = ["ECB", "CBC", "CFB", "OFB"]
@@ -122,7 +122,23 @@ def encryptAES(file):
         else:
             print("Program stopped")
     elif mode == "CFB":
-        print("CFB")
+        iv = findParam("-iv")
+        if not iv:
+            iv = os.urandom(16)
+            iv_string = binascii.hexlify(iv)
+        else:
+            iv_string = binascii.hexlify(iv)
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: CFB")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "CFB", key, iv)
+            encryption.encrypt()
+        else:
+            print("Program stopped")
     elif mode == "OFB":
         iv = findParam("-iv")
         if not iv:
@@ -192,7 +208,22 @@ def decryptAES(file):
             print("Program stopped")
 
     elif mode == "CFB":
-        print("CFB")
+        iv = findParam("-iv")
+        if not iv:
+            return
+        iv_string = binascii.hexlify(iv)
+        iv = [hex(byte) for byte in iv]
+        printFileDetails(file)
+        print("Algorithm: AES")
+        print("Mode: CFB")
+        print("Key: {}".format(key))
+        print("IV: {}".format(iv_string))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            encryption = AES.AES(file, "CFB", key, iv)
+            encryption.decrypt()
+        else:
+            print("Program stopped")
     elif mode == "OFB":
         iv = findParam("-iv")
         if not iv:
@@ -213,6 +244,40 @@ def decryptAES(file):
     else:
         print("Invalid mode")
         print("Use -h -alg to see the list of available AES modes")
+
+def encryptRC4(file):
+    key = findParam("-k")
+
+    if not key:
+        print("Use -k to specify the key for RC4")
+        return
+
+    printFileDetails(file)
+    print("Algorithm: RC4")
+    print("Key: {}".format(key))
+    res = input("Continue? (y/n): ")
+    if res == "y":
+        encryption = RC4.RC4(file, key)
+        encryption.encrypt()
+    else:
+        print("Program stopped")
+
+def decryptRC4(file):
+    key = findParam("-k")
+
+    if not key:
+        print("Use -k to specify the key for RC4")
+        return
+
+    printFileDetails(file)
+    print("Algorithm: RC4")
+    print("Key: {}".format(key))
+    res = input("Continue? (y/n): ")
+    if res == "y":
+        encryption = RC4.RC4(file, key)
+        encryption.decrypt()
+    else:
+        print("Program stopped")
 
 def encryptionStart():
     print("Encryption process")
@@ -235,7 +300,7 @@ def encryptionStart():
     elif algorithm == "Salsa":
         print("Salsa 20/12")
     elif algorithm == "RC4":
-        print("RC4")
+        encryptRC4(filename)
     else:
         print("Invalid algorithm")
         print("Use -h -alg to see the list of available algorithms")
@@ -266,7 +331,11 @@ def decryptionStart():
     elif algorithm == "Salsa":
         print("Salsa 20/12")
     elif algorithm == "RC4":
-        print("RC4")
+        extension = os.path.splitext(filename)[1]
+        if extension != ".rc4":
+            print("Wrong file extension for RC4 decryption")
+        else:
+            decryptRC4(filename)
     else:
         print("Invalid algorithm")
         print("Use -h -alg to see the list of available algorithms")
