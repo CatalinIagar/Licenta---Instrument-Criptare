@@ -3,7 +3,7 @@ import os
 import binascii
 
 import printHelper
-from Algorithms import AES, RC4
+from Algorithms import AES, RC4, SHA256
 
 ALGORITHMS = ["AES", "TwoFish", "Salsa", "RC4", "RSA", "ECC"]
 AES_MODES = ["ECB", "CBC", "CFB", "OFB"]
@@ -40,7 +40,7 @@ def findParam(param):
             print("Value correct")
             return value
 
-    if param == "-f":
+    if param == "-f" or param == "-f1" or param == "-f2":
         if os.path.isfile(value):
             return value
         else:
@@ -64,6 +64,9 @@ def findParam(param):
             return False
 
     if param == "-k":
+        return value
+
+    if param == "-o":
         return value
 
 def printFileDetails(file):
@@ -263,6 +266,23 @@ def encryptRC4(file):
     else:
         print("Program stopped")
 
+def encryptTwoFish(file):
+    key = findParam("-k")
+
+    if not key:
+        print("Use -k to specify the key for TwoFish")
+        return
+
+    printFileDetails(file)
+    print("Algorithm: TwoFish")
+    print("Key: {}".format(key))
+    res = input("Continue? (y/n): ")
+    if res == "y":
+        encryption = RC4.RC4(file, key)
+        encryption.encrypt()
+    else:
+        print("Program stopped")
+
 def decryptRC4(file):
     key = findParam("-k")
 
@@ -296,8 +316,8 @@ def encryptionStart():
 
     if algorithm == "AES":
         encryptAES(filename)
-    elif algorithm == "TwoFish":
-        print("TwoFish")
+    elif algorithm == "TWOFISH":
+        print("asd")
     elif algorithm == "Salsa":
         print("Salsa 20/12")
     elif algorithm == "RC4":
@@ -342,12 +362,57 @@ def decryptionStart():
         print("Use -h -alg to see the list of available algorithms")
         return
 
+def hashStart():
+    print("Hashing process")
+
+    filename = findParam("-f")
+    if not filename:
+        print("Use -f to specify the file for hasing")
+        return
+
+    output = findParam("-o")
+    if not output:
+        print("Use -o to specify the output file")
+        return
+
+    printFileDetails(filename)
+    print("Algorithm: SHA256")
+    res = input("Continue? (y/n): ")
+    if res == "y":
+        hash = SHA256.SHA256(filename, output)
+        hash.sha256_streaming()
+    else:
+        print("Program stopped")
+
+def hashVerifyStart():
+    file1 = findParam("-f1")
+    if not file1:
+        print("Use -f1 to specify first file")
+        return
+    file2 = findParam("-f2")
+    if not file2:
+        print("Use -f2 to specify 2nd file")
+        return
+
+    with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
+        bytes1 = f1.read()
+        bytes2 = f2.read()
+
+        if bytes1 == bytes2:
+            print("Hash values are equal")
+        else:
+            print("Hash values are different")
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == "encrypt":
             encryptionStart()
         elif sys.argv[1] == "decrypt":
             decryptionStart()
+        elif sys.argv[1] == "hash":
+            hashStart()
+        elif sys.argv[1] == "hash-verify":
+            hashVerifyStart()
         elif sys.argv[1] == "-h":
             if len(sys.argv) == 3:
                 extraArg = sys.argv[2]
