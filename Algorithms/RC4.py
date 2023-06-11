@@ -3,7 +3,7 @@ import os
 class RC4:
     def __init__(self, file, key, chunk_size = 1024*1024):
         self.file = file
-        self.key = key.encode()
+        self.key = key
         self.chunk_size = chunk_size
 
     def rc4_encrypt(self, chunk):

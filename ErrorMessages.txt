@@ -1,0 +1,107 @@
+GENERATE_KEY_LESS_THAN_0
+Key length must be a positive number > 0
+END
+
+GENERATE_KEY_LENGTH
+Invalid given length for key generation
+Use -H
+END
+
+NO_START_ARGUMENT_FOUND
+Missing argument
+Use -h for a list of available arguments
+END
+
+NO_ALGORITHM_SPECIFIED
+Invalid encryption algorithm
+Use -alg to specify the encryption algorithm
+Use -h -alg to see the list of available algorithms
+END
+
+NO_ALGORITHM_FOUND
+Missing encryption algorithm
+Use -alg to specify the encryption algorithm
+Use -h -alg to see the list of available algorithms
+END
+
+NO_AES_MODE_SPECIFIED
+Invalid AES mode algorithm
+END
+
+NO_INPUT_FILE_SPECIFIED
+Use -f to specify the input file for hashing
+END
+
+NO_INPUT_FILE_1_SPECIFIED
+Use -f1 to specify the input file for hashing
+END
+
+NO_INPUT_FILE_2_SPECIFIED
+Use -f2 to specify the input file for hashing
+END
+
+NO_OUTPUT_FILE_SPECIFIED
+Use -o to specify the output file for hashing
+END
+
+NO_AES_KEY_FOUND
+Use -k to specify the key for AES
+END
+
+NO_RC4_KEY_FOUND
+Use -k to specify the key for RC4
+END
+
+NO_TWOFISH_KEY_FOUND
+Use -k to specify the key for TwoFish
+END
+
+NO_SALSA_KEY_FOUND
+Use -k to specify the key for SALSA
+END
+
+NO_SALSA_NONCE_FOUND
+Use -n to specify the nonce for SALSA
+END
+
+NO_AES_IV_FOUND
+Use -iv to specify the iv for AES
+END
+
+AES_KEY_LENGTH_ERROR
+Invalid key
+Key must be 128-bit long (16 characters)
+Use generate_key -l 16 to generate a 16 bytes key
+END
+
+TWOFISH_KEY_LENGTH_ERROR
+Invalid key
+Key must be 16, 24 or 32 bytes
+Use generate_key -l 16, 24 or 32 to generate a key
+END
+
+SALSA_KEY_LENGTH_ERROR
+Invalid key
+Key must be 32 bytes
+Use generate_key -l 32 to generate a key
+END
+
+SALSA_NONCE_LENGTH_ERROR
+Invalid key
+Nonce must be 8 bytes
+Use generate_key -l 8 to generate a key
+END
+
+AES_KEY_LENGTH_ERROR
+Invalid iv
+iv must be 128-bit long (16 characters)
+Use generate_key -l 16 to generate a 16 bytes iv
+END
+
+AES_DECRYPT_WRONG_EXTENSION
+Wrong file extension for AES decryption
+END
+
+PROGRAM_STOP
+Program stopped
+END

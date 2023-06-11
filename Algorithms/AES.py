@@ -4,7 +4,7 @@ import binascii
 def turn_to_hex(text):
     res = []
     for letter in text:
-        res.append(hex(ord(letter)))
+        res.append(hex(letter))
     return res
 
 
@@ -516,8 +516,6 @@ class AES:
                     else:
                         hex_string += hex_data[i][2:]
 
-                print(hex_string)
-
                 w.write(bytes.fromhex(hex_string))
 
     def decrypt_ecb(self):
@@ -594,8 +592,6 @@ class AES:
                         else:
                             hex_string += self.state[row][col][2:]
 
-                print(hex_string)
-
                 block = bytes.fromhex(hex_string)
 
                 if i == blocks:
@@ -613,7 +609,7 @@ class AES:
         self.generate_keys(self.key)
         file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
 
-        iv = self.iv
+        iv = [hex(byte) for byte in self.iv]
 
         with open(self.file, "rb") as f, open(file_to_write, "wb") as w:
             while True:
@@ -643,7 +639,5 @@ class AES:
                         hex_string += "0" + hex_data[i][2:]
                     else:
                         hex_string += hex_data[i][2:]
-
-                print(hex_string)
 
                 w.write(bytes.fromhex(hex_string))
