@@ -76,15 +76,8 @@ class TwoFish:
 def rotate_right_32(x, n):
     return (x >> n) | ((x << (32 - n)) & 0xFFFFFFFF)
 
-
 def rotate_left_32(x, n):
     return ((x << n) & 0xFFFFFFFF) | (x >> (32 - n))
-
-
-def bytes_wap32(x):
-    return ((x & 0xff) << 24) | (((x >> 8) & 0xff) << 16) | \
-           (((x >> 16) & 0xff) << 8) | ((x >> 24) & 0xff)
-
 
 class TWI:
     def __init__(self):

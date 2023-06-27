@@ -1,14 +1,16 @@
-import binascii
 import os
-import random
 import sys
 import ast
+import psutil
+import re
 
 from Algorithms.SHA256 import SHA256
 from Algorithms.AES import AES
 from Algorithms.RC4 import RC4
 from Algorithms.TwoFish import TwoFish
 from Algorithms.Salsa20 import Salsa20
+from Algorithms.RSA import RSA
+from Algorithms.ECC import ECCAlgorithm
 from ErrorHelper import Errors
 
 ALGORITHMS = ["AES", "TwoFish", "Salsa", "RC4", "RSA", "ECC"]
@@ -16,13 +18,18 @@ AES_MODES = ["ECB", "CBC", "CFB", "OFB"]
 
 E = Errors()
 
-
 class App:
 
     def start(self):
         if len(sys.argv) > 1:
             if sys.argv[1] == "generate_key":
                 self.generate_byte_key()
+            elif sys.argv[1] == "generate_rsa_key":
+                public_key, private_key = RSA().generate_key()
+                print("Public RSA key: (e, n):", public_key)
+                print("Private RSA key: (d, n):", private_key)
+            elif sys.argv[1] == "generate_ecc_key":
+                ECCAlgorithm().generate_key()
             elif sys.argv[1] == "hash":
                 self.hashStart()
             elif sys.argv[1] == "hash_verify":
@@ -57,7 +64,7 @@ class App:
         if param == "-iv":
             return value
 
-        if param == "-f" or param == "-f1" or param == "-f2":
+        if param == "-f" or param == "-f1" or param == "-f2" or param == "-kf":
             if os.path.isfile(value):
                 return value
             else:
@@ -88,6 +95,9 @@ class App:
         if param == "-l":
             return value
 
+        if param == "-s":
+            return value
+
     def encryption_start(self):
         print("Encryption process")
 
@@ -102,13 +112,17 @@ class App:
             return
 
         if algorithm == "AES":
-            self.encryptAES(filename)
+            self.encrypt_AES(filename)
         elif algorithm == "TwoFish":
             self.encrypt_TwoFish(filename)
         elif algorithm == "Salsa":
             self.encrypt_Salsa(filename)
         elif algorithm == "RC4":
             self.encrypt_RC4(filename)
+        elif algorithm == "RSA":
+            self.encrypt_RSA(filename)
+        elif algorithm == "ECC":
+            self.encrypt_ECC(filename)
         else:
             E.error_message("NO_ALGORITHM_FOUND")
             return
@@ -131,7 +145,7 @@ class App:
             if extension != ".aes":
                 E.error_message("AES_DECRYPT_WRONG_EXTENSION")
             else:
-                self.decryptAES(filename)
+                self.decrypt_AES(filename)
         elif algorithm == "TwoFish":
             extension = os.path.splitext(filename)[1]
             if extension != ".twofish":
@@ -150,12 +164,24 @@ class App:
                 print("Wrong file extension for RC4 decryption")
             else:
                 self.decrypt_RC4(filename)
+        elif algorithm == "RSA":
+            extension = os.path.splitext(filename)[1]
+            if extension != ".rsa":
+                print("Wrong file extension for RSA decryption")
+            else:
+                self.decrypt_RSA(filename)
+        elif algorithm == "ECC":
+            extension = os.path.splitext(filename)[1]
+            if extension != ".ecc":
+                print("Wrong file extension for ECC decryption")
+            else:
+                self.decrypt_ECC(filename)
         else:
             print("Invalid algorithm")
             print("Use -h -alg to see the list of available algorithms")
             return
 
-    def encryptAES(self, file):
+    def encrypt_AES(self, file):
         mode = self.find_param("-m")
         if not mode:
             print("Use -m to specify the mode for AES")
@@ -268,6 +294,52 @@ class App:
         else:
             print("Program stopped")
 
+    def encrypt_RSA(self, file):
+        key = self.find_param("-k")
+
+        if not key:
+            E.error_message("NO_RSA_KEY_FOUND")
+            return
+
+        pattern = r'^\(\d+,\s\d+\)$'
+
+        if re.match(pattern, key) is None:
+            print("Invalid RSA key format")
+            return
+
+        self.print_file_details(file)
+        print("Algorithm: RSA")
+        print("Key: {}".format(key))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            RSA().encrypt(file, key)
+        else:
+            print("Program stopped")
+
+    def encrypt_ECC(self, file):
+        key = self.find_param("-kf")
+
+        if not key:
+            print("No public key found")
+            return
+
+        secret = self.find_param("-s")
+        secret = ast.literal_eval(secret)
+
+        if not secret:
+            print("No secret found")
+            return
+
+        self.print_file_details(file)
+        print("Algorithm: ECC")
+        print("Key: {}".format(key))
+        print("Secret: {}".format(secret))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            ECCAlgorithm().encrypt(key, file, secret)
+        else:
+            print("Program stopped")
+
     def encrypt_TwoFish(self, file):
         key = self.find_param("-k")
         key = ast.literal_eval(key)
@@ -324,7 +396,7 @@ class App:
         else:
             print("Program stopped")
 
-    def decryptAES(self, file):
+    def decrypt_AES(self, file):
         mode = self.find_param("-m")
         if not mode:
             print("Use -m to specify the mode for AES")
@@ -437,6 +509,48 @@ class App:
         else:
             print("Program stopped")
 
+    def decrypt_RSA(self, file):
+        key = self.find_param("-k")
+
+        if not key:
+            E.error_message("NO_RSA_KEY_FOUND")
+            return
+
+        pattern = r'^\(\d+,\s\d+\)$'
+
+        if re.match(pattern, key) is None:
+            print("Invalid RSA key format")
+            return
+
+        self.print_file_details(file)
+        print("Algorithm: RSA")
+        print("Key: {}".format(key))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            RSA().decrypt(file, key)
+        else:
+            print("Program stopped")
+
+    def decrypt_ECC(self, file):
+        key = self.find_param("-kf")
+
+        secret = self.find_param("-s")
+        secret = ast.literal_eval(secret)
+
+        if not secret:
+            print("No secret found")
+            return
+
+        self.print_file_details(file)
+        print("Algorithm: ECC")
+        print("Key: {}".format(key))
+        print("Secret: {}".format(secret))
+        res = input("Continue? (y/n): ")
+        if res == "y":
+            ECCAlgorithm().decrypt(key, file, secret)
+        else:
+            print("Program stopped")
+
     def decrypt_TwoFish(self, file):
         key = self.find_param("-k")
         key = ast.literal_eval(key)
@@ -502,11 +616,11 @@ class App:
         print("File size: " + str(size) + " bytes")
 
     def hashVerifyStart(self):
-        file1 = self.findParam("-f1")
+        file1 = self.find_param("-f1")
         if not file1:
             E.error_message("NO_INPUT_FILE_1_SPECIFIED")
             return
-        file2 = self.findParam("-f2")
+        file2 = self.find_param("-f2")
         if not file2:
             E.error_message("NO_INPUT_FILE_2_SPECIFIED")
             return
@@ -523,12 +637,12 @@ class App:
     def hashStart(self):
         print("Hashing process")
 
-        filename = self.findParam("-f")
+        filename = self.find_param("-f")
         if not filename:
             E.error_message("NO_INPUT_FILE_SPECIFIED")
             return
 
-        output = self.findParam("-o")
+        output = self.find_param("-o")
         if not output:
             E.error_message("NO_OUTPUT_FILE_SPECIFIED")
             return
@@ -541,7 +655,6 @@ class App:
             hash.sha256_streaming()
         else:
             E.error_message("PROGRAM_STOP")
-
     def generate_byte_key(self):
         length = self.find_param("-l")
         length = int(length)
@@ -550,7 +663,22 @@ class App:
             E.error_message("GENERATE_KEY_LESS_THAN_0")
             return
 
-        key = [random.randint(0, 255) for _ in range(length)]
-        key_bytes = bytes(key)
+        cpu_freq = str(psutil.cpu_freq().current)
+        ram_usage = psutil.virtual_memory().percent
 
-        print(key_bytes)
+        seed = os.urandom(32)
+
+        data = seed + cpu_freq.encode() + str(ram_usage).encode()
+
+        key = SHA256().sha256(data)
+
+        while len(key) < length:
+            cpu_freq = str(psutil.cpu_freq().current)
+            ram_usage = psutil.virtual_memory().percent
+            seed = os.urandom(32)
+            data = seed + cpu_freq.encode() + str(ram_usage).encode()
+            key += SHA256().sha256(data)
+
+        key = key[:length]
+
+        print(key)

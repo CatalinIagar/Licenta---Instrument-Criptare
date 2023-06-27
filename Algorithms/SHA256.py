@@ -1,4 +1,5 @@
 import struct
+import os
 
 class SHA256:
 
@@ -13,7 +14,7 @@ class SHA256:
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     ]
 
-    def __init__(self, filename, output):
+    def __init__(self, filename = "", output = ""):
         self.file = filename
         self.out = output
 
@@ -27,11 +28,22 @@ class SHA256:
                 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
             ]
 
-            while True:
-                block = input_file.read(block_size)
-                if not block:
-                    break
-                block = block.ljust(block_size, b'\0')
+            message = input_file.read()
+            length = len(message)
+            if (length + 8) % 64 != 0:
+                message += b'\x80'
+                while (len(message) + 8) % 64 != 0:
+                    message += b'\x00'
+
+            message += struct.pack('>Q',length * 8)
+
+            num_blocks = int(len(message) / 64)
+
+            for i in range (num_blocks):
+
+                start = i * block_size
+                end = start + block_size
+                block = message[start:end]
 
                 words = struct.unpack('!16L', block)
                 w = list(words) + [0] * (64 - len(words))
@@ -68,6 +80,62 @@ class SHA256:
                 H[7] = (H[7] + h) & 0xffffffff
 
             hash_text = b"".join([struct.pack(">I", h) for h in H])
-            print(hash_text)
-
             output_file.write(hash_text)
+
+    def sha256(self, input, block_size = 64):
+        H = [
+            0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+        ]
+
+        message = input
+        length = len(message)
+        if (length + 8) % 64 != 0:
+            message += b'\x80'
+            while (len(message) + 8) % 64 != 0:
+                message += b'\x00'
+
+        message += struct.pack('>Q', length * 8)
+
+        num_blocks = int(len(message) / 64)
+
+        for block_index in range(num_blocks):
+            start = block_index * block_size
+            end = start + block_size
+            block = message[start:end]
+
+            words = struct.unpack('!16L', block)
+            w = list(words) + [0] * (64 - len(words))
+            for i in range(16, 64):
+                s0 = (w[i - 15] >> 7 | w[i - 15] << 25) ^ (w[i - 15] >> 18 | w[i - 15] << 14) ^ (w[i - 15] >> 3)
+                s1 = (w[i - 2] >> 17 | w[i - 2] << 15) ^ (w[i - 2] >> 19 | w[i - 2] << 13) ^ (w[i - 2] >> 10)
+                w[i] = (w[i - 16] + s0 + w[i - 7] + s1) & 0xffffffff
+
+            a, b, c, d, e, f, g, h = list(H)
+            for i in range(64):
+                S1 = (e >> 6 | e << 26) ^ (e >> 11 | e << 21) ^ (e >> 25 | e << 7)
+                ch = (e & f) ^ (~e & g)
+                temp1 = h + S1 + ch + self.K[i] + w[i]
+                S0 = (a >> 2 | a << 30) ^ (a >> 13 | a << 19) ^ (a >> 22 | a << 10)
+                maj = (a & b) ^ (a & c) ^ (b & c)
+                temp2 = S0 + maj
+
+                h = g
+                g = f
+                f = e
+                e = (d + temp1) & 0xffffffff
+                d = c
+                c = b
+                b = a
+                a = (temp1 + temp2) & 0xffffffff
+
+            H[0] = (H[0] + a) & 0xffffffff
+            H[1] = (H[1] + b) & 0xffffffff
+            H[2] = (H[2] + c) & 0xffffffff
+            H[3] = (H[3] + d) & 0xffffffff
+            H[4] = (H[4] + e) & 0xffffffff
+            H[5] = (H[5] + f) & 0xffffffff
+            H[6] = (H[6] + g) & 0xffffffff
+            H[7] = (H[7] + h) & 0xffffffff
+
+        hash_text = b"".join([struct.pack(">I", h) for h in H])
+        return hash_text

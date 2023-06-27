@@ -1,12 +1,4 @@
 import os
-import binascii
-
-def turn_to_hex(text):
-    res = []
-    for letter in text:
-        res.append(hex(letter))
-    return res
-
 
 class AES:
     SBOX = [
@@ -71,6 +63,12 @@ class AES:
         self.state = []
         self.iv = iv
 
+    def turn_to_hex(self, text):
+        res = []
+        for letter in text:
+            res.append(hex(letter))
+        return res
+
     def generate_words(self, key):
         temp = key
         result = []
@@ -119,7 +117,7 @@ class AES:
         return result
 
     def generate_keys(self, key):
-        hexKey = turn_to_hex(key)
+        hexKey = self.turn_to_hex(key)
         self.keys.append(hexKey)
 
         for i in range(10):
@@ -577,7 +575,7 @@ class AES:
                 if first:
                     for col in range(4):
                         for row in range(4):
-                            self.state[row][col] = hex(int(self.state[row][col], 16) ^ int(self.iv[col * 4 + row], 16))
+                            self.state[row][col] = hex(int(self.state[row][col], 16) ^ self.iv[col * 4 + row])
                     first = False
                 else:
                     for col in range(4):
