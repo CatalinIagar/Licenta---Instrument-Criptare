@@ -23,6 +23,8 @@ class RSA:
 
                 pickle.dump(encrypted_bytes, w)
 
+        print("Encryption process finished successfully.")
+
 
     def decrypt(self, file, key):
         private_key_str = key.strip()[1:-1]
@@ -40,6 +42,8 @@ class RSA:
             decrypted_msg = [pow(c, d, n) for c in input_bytes]
 
             w.write(bytes(decrypted_msg))
+
+        print("Decryption process finished successfully.")
 
 
     def generate_key(self):

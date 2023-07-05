@@ -362,6 +362,8 @@ class AES:
                             hex_string += self.state[row][col][2:]
                 w.write(bytes.fromhex(hex_string))
 
+        print("Encryption process finished successfully.")
+
     def encrypt_cbc(self):
         self.generate_keys(self.key)
         file_to_write = self.file + ".aes"
@@ -402,6 +404,8 @@ class AES:
 
                 w.write(bytes.fromhex(hex_string))
 
+        print("Encryption process finished successfully.")
+
     def encrypt_cfb(self):
         self.generate_keys(self.key)
         file_to_write = self.file + ".aes"
@@ -439,6 +443,8 @@ class AES:
                         hex_string += crypt_block[i][2:]
 
                 w.write(bytes.fromhex(hex_string))
+
+        print("Encryption process finished successfully.")
 
     def decrypt_cfb(self):
         self.generate_keys(self.key)
@@ -480,6 +486,8 @@ class AES:
 
                 w.write(bytes.fromhex(hex_string))
 
+        print("Decryption process finished successfully.")
+
     def encrypt_ofb(self):
         self.generate_keys(self.key)
         file_to_write = self.file + ".aes"
@@ -515,6 +523,8 @@ class AES:
                         hex_string += hex_data[i][2:]
 
                 w.write(bytes.fromhex(hex_string))
+
+        print("Encryption process finished successfully.")
 
     def decrypt_ecb(self):
         self.generate_keys(self.key)
@@ -552,7 +562,7 @@ class AES:
 
                 w.write(block)
 
-
+        print("Decryption process finished successfully.")
 
     def decrypt_cbc(self):
         self.generate_keys(self.key)
@@ -603,6 +613,8 @@ class AES:
 
                 w.write(block)
 
+        print("Decryption process finished successfully.")
+
     def decrypt_ofb(self):
         self.generate_keys(self.key)
         file_to_write = self.file.replace(os.path.splitext(self.file)[1], "")
@@ -639,3 +651,5 @@ class AES:
                         hex_string += hex_data[i][2:]
 
                 w.write(bytes.fromhex(hex_string))
+
+        print("Decryption process finished successfully.")

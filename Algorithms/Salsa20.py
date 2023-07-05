@@ -95,6 +95,8 @@ class Salsa20:
 
                 w.write(encrypted_message)
 
+        print("Encryption process finished successfully.")
+
     def decrypt(self):
         output_file = self.file.replace(os.path.splitext(self.file)[1], "")
 
@@ -117,3 +119,5 @@ class Salsa20:
                     counter[1] += 1
 
                 w.write(encrypted_message)
+
+        print("Decryption process finished successfully.")

@@ -74,6 +74,8 @@ class ECCAlgorithm:
             out_file.write(ciphertext)
             out_file.write(mac)
 
+        print("Encryption process finished successfully.")
+
     def decrypt(self, private_key_file, ciphertext_file, shared_info):
         file_to_write = ciphertext_file.replace(os.path.splitext(ciphertext_file)[1], "")
         private_key = self.load_private_key(private_key_file)
@@ -105,3 +107,5 @@ class ECCAlgorithm:
 
         with open(file_to_write, "wb") as out:
             out.write(decrypted_message)
+
+        print("Decryption process finished successfully.")

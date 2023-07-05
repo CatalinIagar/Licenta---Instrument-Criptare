@@ -56,6 +56,8 @@ class RC4:
                 encrypted_chunk = self.rc4_encrypt(chunk)
                 out_file.write(encrypted_chunk)
 
+        print("Encryption process finished successfully.")
+
     def decrypt(self):
         output_file = self.file.replace(os.path.splitext(self.file)[1], "")
         with open(self.file, 'rb') as in_file, open(output_file, 'wb') as out_file:
@@ -65,3 +67,5 @@ class RC4:
                     break
                 encrypted_chunk = self.rc4_encrypt(chunk)
                 out_file.write(encrypted_chunk)
+
+        print("Decryption process finished successfully.")
