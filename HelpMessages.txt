@@ -1,0 +1,124 @@
+HELP_MENU
+Usage: python main.py [parameter]
+
+Parameters:
+  encrypt            : Encrypt a file using a specified algorithm and key.
+      -h encrypt     : Display detailed help for the encrypt function.
+  decrypt            : Decrypt an encrypted file using the corresponding key.
+      -h decrypt     : Display detailed help for the decrypt function.
+  hash               : Calculate the hash value of a file using SHA-256 algorithm.
+      -h hash        : Display detailed help for the hash function.
+  hash_verify        : Verify the integrity of a file by comparing its hash value with a provided hash.
+      -h hash_verify : Display detailed help for the hash_verify function.
+  generate_key       : Generate a symmetric encryption key for use in encryption and decryption.
+      -h generate_key: Display detailed help for the generate_key function.
+  generate_rsa_key   : Generate an RSA key pair for asymmetric encryption and decryption.
+  generate_ecc_key   : Generate an ECC key pair for elliptic curve cryptography.
+
+Additional Options:
+  -h              : Display this help menu.
+END
+
+HELP_ENCRYPT_MENU
+Usage: python main.py encrypt [options]
+
+Options:
+  -f <file>        Specify the file to encrypt.
+  -alg <algorithm> Select the encryption algorithm. Available options: AES, TwoFish, RC4, Salsa20, RSA, ECC.
+  -m <mode>        Select the mode for AES encryption (applicable only with AES).
+                   Available options: ECB, CBC, OFB, CFB.
+  -k <key>         Specify the encryption key.
+  -kf <key_file>   Specify the file containing the encryption key (applicable only with ECC).
+  -IV <iv>         Specify the initialization vector (applicable only with certain algorithms).
+  -n <nonce>       Specify the nonce value (applicable only with certain algorithms).
+  -s <secret>      Specify the shared secret (applicable only with ECC).
+
+Note:
+  - For ECC encryption, use the `-kf` option to specify the path to the private key file.
+  - For AES encryption, the `-m` option is required to specify the encryption mode.
+  - Additional options like `-IV`, `-n`, and `-s` are specific to certain algorithms and can be used as needed.
+
+To see the required options for each algorithm, use the following command:
+  python main.py -h [algorithm]
+END
+
+HELP_DECRYPT_MENU
+Usage: python main.py decrypt [options]
+
+Options:
+  -f <file>        Specify the file to decrypt.
+  -alg <algorithm> Select the encryption algorithm. Available options: AES, TwoFish, RC4, Salsa20, RSA, ECC.
+  -m <mode>        Select the mode for AES encryption (applicable only with AES).
+                   Available options: ECB, CBC, OFB, CFB.
+  -k <key>         Specify the encryption key.
+  -kf <key_file>   Specify the file containing the encryption key (applicable only with ECC).
+  -IV <iv>         Specify the initialization vector (applicable only with certain algorithms).
+  -n <nonce>       Specify the nonce value (applicable only with certain algorithms).
+  -s <secret>      Specify the shared secret (applicable only with ECC).
+
+Note:
+  - For ECC encryption, use the `-kf` option to specify the path to the private key file.
+  - For AES encryption, the `-m` option is required to specify the encryption mode.
+  - Additional options like `-IV`, `-n`, and `-s` are specific to certain algorithms and can be used as needed.
+
+To see the required options for each algorithm, use the following command:
+  python main.py -h [algorithm]
+END
+
+HELP_AES_MENU
+AES Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -m <mode>      Select the mode for AES encryption.
+                 Available options: ECB, CBC, OFB, CFB.
+  -k <key>       Specify the encryption key (128-bits).
+  -iv <iv>       Specify the initialization vector (128-bits) (applicable only with certain modes).
+END
+
+HELP_TwoFish_MENU
+TwoFish Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -k <key>       Specify the encryption key (128-bits).
+END
+
+HELP_RC4_MENU
+RC4 Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -k <key>       Specify the encryption key (40 - 2048-bits).
+END
+
+HELP_Salsa20_MENU
+Salsa20 Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -k <key>       Specify the encryption key (256-bits).
+  -n <nonce>     Specify the nonce (64-bits) (applicable only with certain modes).
+END
+
+HELP_RSA_MENU
+RSA Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -k <key>       Specify the encryption key pair.
+END
+
+HELP_ECC_MENU
+ECC Encryption Options:
+  -f <file>      Specify the file to encrypt/decrypt.
+  -kf <key-file> Specify the encryption key file.
+  -s <secret>    Specify the shared secret.
+END
+
+HELP_HASH_MENU
+Hash Function Options:
+  -f <file>             Specify the file to compute the hash value.
+  -o <output-file name> Specify the output file to store the hash value.
+END
+
+HELP_HASH_VERIFY_MENU
+Hash Verification Options:
+  -f1 <file1>    Specify the first file for hash comparison.
+  -f2 <file2>    Specify the second file for hash comparison.
+END
+
+HELP_GENERATE_KEY_MENU
+Key Generation Options:
+  -l <length>    Specify the length of the generated key.
+END

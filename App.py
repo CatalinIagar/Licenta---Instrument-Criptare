@@ -11,12 +11,13 @@ from Algorithms.TwoFish import TwoFish
 from Algorithms.Salsa20 import Salsa20
 from Algorithms.RSA import RSA
 from Algorithms.ECC import ECCAlgorithm
-from ErrorHelper import Errors
+from ErrorHelper import Errors, Helper
 
 ALGORITHMS = ["AES", "TwoFish", "Salsa", "RC4", "RSA", "ECC"]
 AES_MODES = ["ECB", "CBC", "CFB", "OFB"]
 
 E = Errors()
+H = Helper()
 
 class App:
 
@@ -38,10 +39,43 @@ class App:
                 self.encryption_start()
             elif sys.argv[1] == "decrypt":
                 self.decryption_start()
+            elif sys.argv[1] == "-h":
+                self.help()
             else:
                 E.error_message("NO_START_ARGUMENT_FOUND")
         else:
             E.error_message("NO_START_ARGUMENT_FOUND")
+
+    def help(self):
+        if len(sys.argv) == 2:
+            H.help_message("HELP_MENU")
+        elif len(sys.argv) == 3:
+            if sys.argv[2] == "encrypt":
+                H.help_message("HELP_ENCRYPT_MENU")
+            elif sys.argv[2] == "decrypt":
+                H.help_message("HELP_DECRYPT_MENU")
+            elif sys.argv[2] == "AES":
+                H.help_message("HELP_AES_MENU")
+            elif sys.argv[2] == "TwoFish":
+                H.help_message("HELP_TwoFish_MENU")
+            elif sys.argv[2] == "RC4":
+                H.help_message("HELP_RC4_MENU")
+            elif sys.argv[2] == "Salsa20":
+                H.help_message("HELP_Salsa20_MENU")
+            elif sys.argv[2] == "RSA":
+                H.help_message("HELP_RSA_MENU")
+            elif sys.argv[2] == "ECC":
+                H.help_message("HELP_ECC_MENU")
+            elif sys.argv[2] == "hash":
+                H.help_message("HELP_HASH_MENU")
+            elif sys.argv[2] == "hash_verify":
+                H.help_message("HELP_HASH_VERIFY_MENU")
+            elif sys.argv[2] == "generate_key":
+                H.help_message("HELP_GENERATE_KEY_MENU")
+            else:
+                E.error_message("WRONG_HELP_MENU_PARAMETER")
+        else:
+            H.help_message("HELP_MENU")
 
     def find_param(self, param):
         found = False
@@ -68,7 +102,7 @@ class App:
             if os.path.isfile(value):
                 return value
             else:
-                print("File doesn't exist")
+                E.error_message("NO_FILE")
                 return False
 
         if param == "-alg":
@@ -124,7 +158,7 @@ class App:
         elif algorithm == "ECC":
             self.encrypt_ECC(filename)
         else:
-            E.error_message("NO_ALGORITHM_FOUND")
+            E.error_message("INVALID_ALGORITHM")
             return
 
     def decryption_start(self):
@@ -149,42 +183,41 @@ class App:
         elif algorithm == "TwoFish":
             extension = os.path.splitext(filename)[1]
             if extension != ".twofish":
-                print("Wrong file extension for TwoFish decryption")
+                E.error_message("TWOFISH_DECRYPT_WRONG_EXTENSION")
             else:
                 self.decrypt_TwoFish(filename)
         elif algorithm == "Salsa":
             extension = os.path.splitext(filename)[1]
             if extension != ".salsa20":
-                print("Wrong file extension for Salsa decryption")
+                E.error_message("SALSA20_DECRYPT_WRONG_EXTENSION")
             else:
                 self.decrypt_Salsa(filename)
         elif algorithm == "RC4":
             extension = os.path.splitext(filename)[1]
             if extension != ".rc4":
-                print("Wrong file extension for RC4 decryption")
+                E.error_message("RC4_DECRYPT_WRONG_EXTENSION")
             else:
                 self.decrypt_RC4(filename)
         elif algorithm == "RSA":
             extension = os.path.splitext(filename)[1]
             if extension != ".rsa":
-                print("Wrong file extension for RSA decryption")
+                E.error_message("RSA_DECRYPT_WRONG_EXTENSION")
             else:
                 self.decrypt_RSA(filename)
         elif algorithm == "ECC":
             extension = os.path.splitext(filename)[1]
             if extension != ".ecc":
-                print("Wrong file extension for ECC decryption")
+                E.error_message("ECC_DECRYPT_WRONG_EXTENSION")
             else:
                 self.decrypt_ECC(filename)
         else:
-            print("Invalid algorithm")
-            print("Use -h -alg to see the list of available algorithms")
+            E.error_message("INVALID_ALGORTIHM")
             return
 
     def encrypt_AES(self, file):
         mode = self.find_param("-m")
         if not mode:
-            print("Use -m to specify the mode for AES")
+            E.error_message("NO_AES_MODE_SPECIFIED")
             return
 
         key = self.find_param("-k")
@@ -208,7 +241,7 @@ class App:
                 encryption = AES(file, "ECB", key)
                 encryption.encrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
         elif mode == "CBC":
             iv = self.find_param("-iv")
             iv = ast.literal_eval(iv)
@@ -230,7 +263,7 @@ class App:
                 encryption = AES(file, "CBC", key, iv)
                 encryption.encrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
         elif mode == "CFB":
             iv = self.find_param("-iv")
             iv = ast.literal_eval(iv)
@@ -251,7 +284,7 @@ class App:
                 encryption = AES(file, "CFB", key, iv)
                 encryption.encrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
         elif mode == "OFB":
             iv = self.find_param("-iv")
             iv = ast.literal_eval(iv)
@@ -292,7 +325,7 @@ class App:
             encryption = RC4(file, key)
             encryption.encrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def encrypt_RSA(self, file):
         key = self.find_param("-k")
@@ -304,7 +337,7 @@ class App:
         pattern = r'^\(\d+,\s\d+\)$'
 
         if re.match(pattern, key) is None:
-            print("Invalid RSA key format")
+            E.error_message("INVALID_RSA_KEY_FORMAT")
             return
 
         self.print_file_details(file)
@@ -314,20 +347,20 @@ class App:
         if res == "y":
             RSA().encrypt(file, key)
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def encrypt_ECC(self, file):
         key = self.find_param("-kf")
 
         if not key:
-            print("No public key found")
+            E.error_message("NO_ECC_PUBLIC_KEY")
             return
 
         secret = self.find_param("-s")
         secret = ast.literal_eval(secret)
 
         if not secret:
-            print("No secret found")
+            E.error_message("NO_ECC_SECRET")
             return
 
         self.print_file_details(file)
@@ -338,7 +371,7 @@ class App:
         if res == "y":
             ECCAlgorithm().encrypt(key, file, secret)
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def encrypt_TwoFish(self, file):
         key = self.find_param("-k")
@@ -360,7 +393,7 @@ class App:
             encryption = TwoFish(file, key)
             encryption.encrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def encrypt_Salsa(self, file):
         key = self.find_param("-k")
@@ -394,12 +427,12 @@ class App:
             encryption = Salsa20(file, key, nonce)
             encryption.encrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def decrypt_AES(self, file):
         mode = self.find_param("-m")
         if not mode:
-            print("Use -m to specify the mode for AES")
+            E.error_message("NO_AES_MODE_SPECIFIED")
             return
 
         key = self.find_param("-k")
@@ -423,7 +456,7 @@ class App:
                 encryption = AES(file, "ECB", key)
                 encryption.decrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
         elif mode == "CBC":
             iv = self.find_param("-iv")
             iv = ast.literal_eval(iv)
@@ -444,7 +477,7 @@ class App:
                 encryption = AES(file, "CBC", key, iv)
                 encryption.decrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
 
         elif mode == "CFB":
             iv = self.find_param("-iv")
@@ -466,7 +499,7 @@ class App:
                 encryption = AES(file, "CFB", key, iv)
                 encryption.decrypt()
             else:
-                print("Program stopped")
+                E.error_message("PROGRAM_STOP")
         elif mode == "OFB":
             iv = self.find_param("-iv")
             iv = ast.literal_eval(iv)
@@ -507,7 +540,7 @@ class App:
             encryption = RC4(file, key)
             encryption.decrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def decrypt_RSA(self, file):
         key = self.find_param("-k")
@@ -519,7 +552,7 @@ class App:
         pattern = r'^\(\d+,\s\d+\)$'
 
         if re.match(pattern, key) is None:
-            print("Invalid RSA key format")
+            E.error_message("INVALID_RSA_KEY_FORMAT")
             return
 
         self.print_file_details(file)
@@ -529,16 +562,20 @@ class App:
         if res == "y":
             RSA().decrypt(file, key)
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def decrypt_ECC(self, file):
         key = self.find_param("-kf")
+
+        if not key:
+            E.error_message("NO_ECC_PRIVATE_KEY")
+            return
 
         secret = self.find_param("-s")
         secret = ast.literal_eval(secret)
 
         if not secret:
-            print("No secret found")
+            E.error_message("NO_ECC_SECRET")
             return
 
         self.print_file_details(file)
@@ -549,7 +586,7 @@ class App:
         if res == "y":
             ECCAlgorithm().decrypt(key, file, secret)
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def decrypt_TwoFish(self, file):
         key = self.find_param("-k")
@@ -571,7 +608,7 @@ class App:
             encryption = TwoFish(file, key)
             encryption.decrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def decrypt_Salsa(self, file):
         key = self.find_param("-k")
@@ -605,7 +642,7 @@ class App:
             encryption = Salsa20(file, key, nonce)
             encryption.decrypt()
         else:
-            print("Program stopped")
+            E.error_message("PROGRAM_STOP")
 
     def print_file_details(self, file):
         filename = os.path.splitext(file)[0]

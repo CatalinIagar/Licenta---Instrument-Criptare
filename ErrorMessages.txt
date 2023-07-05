@@ -2,11 +2,6 @@ GENERATE_KEY_LESS_THAN_0
 Key length must be a positive number > 0
 END
 
-GENERATE_KEY_LENGTH
-Invalid given length for key generation
-Use -H
-END
-
 NO_START_ARGUMENT_FOUND
 Missing argument
 Use -h for a list of available arguments
@@ -18,18 +13,18 @@ Use -alg to specify the encryption algorithm
 Use -h -alg to see the list of available algorithms
 END
 
-NO_ALGORITHM_FOUND
-Missing encryption algorithm
-Use -alg to specify the encryption algorithm
-Use -h -alg to see the list of available algorithms
+INVALID_ALGORTIHM
+Invalid algorithm
+Use -h encrypt/decrypt to see the list of available algorithms
 END
 
 NO_AES_MODE_SPECIFIED
 Invalid AES mode algorithm
+Use -h AES too se the list of available AES modes
 END
 
 NO_INPUT_FILE_SPECIFIED
-Use -f to specify the input file for hashing
+Use -f to specify the input file for the process
 END
 
 NO_INPUT_FILE_1_SPECIFIED
@@ -50,6 +45,26 @@ END
 
 NO_RC4_KEY_FOUND
 Use -k to specify the key for RC4
+END
+
+NO_RSA_KEY_FOUND
+Use -k to specify the key for RSA
+END
+
+INVALID_RSA_KEY_FORMAT
+The specified key isn't a valid RSA key
+END
+
+NO_ECC_PUBLIC_KEY
+Use -kf to specify the public key-file for ECC
+END
+
+NO_ECC_PRIVATE_KEY
+Use -kf to specify the private key-file for ECC
+END
+
+NO_ECC_SECRET
+Use -s to specify the shared secret for ECC
 END
 
 NO_TWOFISH_KEY_FOUND
@@ -93,8 +108,8 @@ Use generate_key -l 8 to generate a key
 END
 
 AES_KEY_LENGTH_ERROR
-Invalid iv
-iv must be 128-bit long (16 characters)
+Invalid IV
+IV must be 128-bit long (16 characters)
 Use generate_key -l 16 to generate a 16 bytes iv
 END
 
@@ -102,6 +117,36 @@ AES_DECRYPT_WRONG_EXTENSION
 Wrong file extension for AES decryption
 END
 
+TWOFISH_DECRYPT_WRONG_EXTENSION
+Wrong file extension for TwoFish decryption
+END
+
+RC4_DECRYPT_WRONG_EXTENSION
+Wrong file extension for RC4 decryption
+END
+
+SALSA20_DECRYPT_WRONG_EXTENSION
+Wrong file extension for Salsa-20 decryption
+END
+
+RSA_DECRYPT_WRONG_EXTENSION
+Wrong file extension for RSA decryption
+END
+
+ECC_DECRYPT_WRONG_EXTENSION
+Wrong file extension for ECC decryption
+END
+
 PROGRAM_STOP
 Program stopped
+END
+
+WRONG_HELP_MENU_PARAMETER
+The used parameter is wrong.
+Use -h for more information.
+END
+
+NO_FILE
+The specified file doesn't exist.
+Make sure you typed the correct file name,
 END
