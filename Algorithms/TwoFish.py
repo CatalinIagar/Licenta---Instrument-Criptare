@@ -1,3 +1,29 @@
+## Copyrights
+## ==========
+##
+## This code is a derived from an implementation by Dr Brian Gladman
+## (gladman@seven77.demon.co.uk) which is subject to the following license.
+## This Python implementation is not subject to any other license.
+##
+##/* This is an independent implementation of the encryption algorithm:   */
+##/*                                                                      */
+##/*         Twofish by Bruce Schneier and colleagues                     */
+##/*                                                                      */
+##/* which is a candidate algorithm in the Advanced Encryption Standard   */
+##/* programme of the US National Institute of Standards and Technology.  */
+##/*                                                                      */
+##/* Copyright in this implementation is held by Dr B R Gladman but I     */
+##/* hereby give permission for its free direct or derivative use subject */
+##/* to acknowledgment of its origin and compliance with any conditions   */
+##/* that the originators of t he algorithm place on its exploitation.    */
+##/*                                                                      */
+##/* My thanks to Doug Whiting and Niels Ferguson for comments that led   */
+##/* to improvements in this implementation.                              */
+##/*                                                                      */
+##/* Dr Brian Gladman (gladman@seven77.demon.co.uk) 14th January 1999     */
+##
+## The above copyright notice must not be removed.
+
 import struct
 import os
 
