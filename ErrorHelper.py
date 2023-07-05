@@ -9,10 +9,16 @@ class Errors:
                 line = line.strip()
 
                 if line == message:
-                    while line != "END":
-                        line = f.readline()
-                        line = line.strip()
-                        print(line)
+                    while True:
+                        line = f.readline().rstrip()
+                        if line == "END":
+                            break
+                        if line:
+                            if line.startswith("Parameters:") or line.startswith(
+                                    "Additional Options:") or line.startswith(
+                                "Options:"):
+                                print()  # Add an extra newline after the specified sections
+                            print(line)
                     break
 
 class Helper:
@@ -27,8 +33,14 @@ class Helper:
                 line = line.strip()
 
                 if line == message:
-                    while line != "END":
-                        line = f.readline()
-                        line = line.strip()
-                        print(line)
+                    while True:
+                        line = f.readline().rstrip()
+                        if line == "END":
+                            break
+                        if line:
+                            if line.startswith("Parameters:") or line.startswith(
+                                    "Additional Options:") or line.startswith(
+                                    "Options:"):
+                                print()  # Add an extra newline after the specified sections
+                            print(line)
                     break
